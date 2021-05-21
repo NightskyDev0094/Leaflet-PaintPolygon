@@ -1,9 +1,7 @@
 //import L from 'leaflet';
 import turf from './myTurf.js';
 import canvg from 'canvg';
-// import './html2canvas.min.js';
-import html2canvas from 'html2canvas';
-import leafletImage from 'leaflet-image';
+import './html2canvas.min.js';
 import './PaintPolygon.css';
 
 ('use strict');
@@ -163,39 +161,41 @@ const PaintPolygon = L.Control.extend({
     this.setAllData();
   },
   capture: async function () {
-    var w = this._map.getContainer().clientWidth;
-    var h = this._map.getContainer().clientHeight;
+    let transform = this._map.getContainer().firstChild.style.transform;
+    let offsetX = transform.slice(transform.indexOf('(') + 1, transform.indexOf('px'));
+    let offsetY = transform.slice(transform.indexOf('px,') + 4, transform.indexOf('px,', transform.indexOf('px,') + 4));
+    let w = this._map.getContainer().clientWidth;
+    let h = this._map.getContainer().clientHeight;
+
     var svg = this._map.getContainer().querySelectorAll('svg')[0].cloneNode(true);
-    var viewDrawed = document.createElement('div');
-    var offsetX = (this._map.getContainer().querySelectorAll('svg')[0].clientWidth - w) / 2;
-    var offsetY = (this._map.getContainer().querySelectorAll('svg')[0].clientHeight - h) / 2;
-
-    svg.style.transform = 'translate(-' + offsetX + 'px, -' + offsetY + 'px)';
-
-    viewDrawed.style.width = w + 'px';
-    viewDrawed.style.height = h + 'px';
-    viewDrawed.style.overflow = 'hidden';
-    viewDrawed.appendChild(svg);
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+    svg.style.transform = 'none';
+    svg.setAttribute('width', w);
+    svg.setAttribute('height', h);
+    var v = `${-Number.parseFloat(offsetX)} ${-Number.parseFloat(offsetY)} ${w} ${h}`;
+    svg.setAttribute('viewBox', v);
 
     var c = document.createElement('canvas');
     const ctx = c.getContext('2d');
-    var v = await canvg.from(ctx, viewDrawed.outerHTML);
+    v = await canvg.from(ctx, svg.outerHTML);
     v.start();
 
-    const mapDiv = this._map;
-    mapDiv.getContainer().querySelectorAll('svg')[0].style.display = 'none';
+    const mapDiv = this._map.getContainer();
 
     const promise = new Promise(function (resolve, reject) {
-      leafletImage(mapDiv, function (err, canvas) {
-        mapDiv.getContainer().querySelectorAll('svg')[0].style.display = '';
-        canvas.getContext('2d').drawImage(c, 0, 0);
-        var a = document.createElement('a');
-        a.href = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
-        a.download = 'map.png';
-        a.click();
-        c.remove();
+      html2canvas(mapDiv, {
+        useCORS: true,
+        onrendered: function (canvas) {
+          canvas.getContext('2d').drawImage(c, 0, 0);
+          var a = document.createElement('a');
+          a.href = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+          a.download = 'map.png';
+          a.click();
+          c.remove();
 
-        resolve(a.href);
+          resolve(a.href);
+        },
       });
     });
 
