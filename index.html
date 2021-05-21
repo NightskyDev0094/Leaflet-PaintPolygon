@@ -51,21 +51,21 @@
   <body">
     <div id="mapid" style="user-select: none"></div>
     <script>
-      // var map = L.map("mapid").setView([43.605413, 3.879568], 10);
+      var map = L.map("mapid").setView([43.605413, 3.879568], 10);
 
-      // L.gridLayer
-      //   .googleMutant({
-      //     type: "roadmap", // valid values are 'roadmap', 'satellite', 'terrain' and 'hybrid',
-      //   })
-      //   .addTo(map);
-      var map = L.map('mapid').setView([43.605413, 3.879568], 10);
+      L.gridLayer
+        .googleMutant({
+          type: "roadmap", // valid values are 'roadmap', 'satellite', 'terrain' and 'hybrid',
+        })
+        .addTo(map);
+      // var map = L.map('mapid').setView([43.605413, 3.879568], 10);
 
-      L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-        minZoom: 0,
-        maxZoom: 20,
-        ext: 'png',
-      }).addTo(map);
+      // L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+      //   subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      //   minZoom: 0,
+      //   maxZoom: 20,
+      //   ext: 'png',
+      // }).addTo(map);
 
       var paintpolygonControl = L.control.paintPolygon({ position: "topleft" }).addTo(map);
 
